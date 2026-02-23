@@ -14,6 +14,7 @@ a{color:var(--link); text-decoration:none;} a:hover{text-decoration:underline;}
 ul{list-style:none; padding:0; margin:0;} li.article{padding:12px 0; border-bottom:1px solid var(--border);} li.article:last-child{border-bottom:none;}
 .title{font-weight:600;}
 .summary{margin-top:6px;}
+.summary-lines{display:flex; flex-direction:column; gap:6px;}
 </style>
 </head>
 <body>
@@ -22,12 +23,12 @@ ul{list-style:none; padding:0; margin:0;} li.article{padding:12px 0; border-bott
 <div class="meta">Date: 2026-02-23 • Items: 140</div>
 <div class="card">
 <h2>Summary</h2>
-<ul>
-<li>Needham lowers DoorDash stock price target to $265 on investment costs By Investing.com.</li>
-<li>DoorDash Stock Jumps After Demand Boom Offsets Q4 Earnings Miss.</li>
-<li>DoorDash Stock Jumps After Demand Boom Offsets Q4 Earnings Miss.</li>
-<li>Doordash stock climbs 14%, reversing plunge after earnings and revenue miss.</li>
-</ul>
+<div class="summary-lines">
+<div class="summary-line">Needham lowers DoorDash stock price target to $265 on investment costs By Investing.com.</div>
+<div class="summary-line">DoorDash Stock Jumps After Demand Boom Offsets Q4 Earnings Miss.</div>
+<div class="summary-line">DoorDash Stock Jumps After Demand Boom Offsets Q4 Earnings Miss.</div>
+<div class="summary-line">Doordash stock climbs 14%, reversing plunge after earnings and revenue miss.</div>
+</div>
 </div>
 <div class="card">
 <h2>Sentiment (non-predictive)</h2>
