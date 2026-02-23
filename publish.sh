@@ -19,12 +19,11 @@ if ! git remote get-url origin >/dev/null 2>&1; then
   exit 1
 fi
 
-TMP_DIR="$(mktemp -u -t gh-pages.XXXXXX)"
+TMP_DIR="$(mktemp -d)"
 
-git worktree add "$TMP_DIR" "$BRANCH" 2>/dev/null || true
-
-if [ ! -d "$TMP_DIR/.git" ]; then
-  # If branch doesn't exist, create an orphan worktree
+if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+  git worktree add --force "$TMP_DIR" "$BRANCH"
+else
   git worktree add --detach "$TMP_DIR"
   (cd "$TMP_DIR" && git checkout --orphan "$BRANCH")
 fi
