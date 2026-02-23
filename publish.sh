@@ -29,7 +29,7 @@ if [ ! -d "$TMP_DIR/.git" ]; then
   (cd "$TMP_DIR" && git checkout --orphan "$BRANCH")
 fi
 
-rsync -av --delete "$SITE_DIR"/ "$TMP_DIR"/
+rsync -av --delete --exclude .git "$SITE_DIR"/ "$TMP_DIR"/
 
 pushd "$TMP_DIR" >/dev/null
 
