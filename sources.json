@@ -1,6 +1,9 @@
 {
   "sources": [
     {"name": "Yahoo Finance", "url": "https://finance.yahoo.com/rss/headline?s={ticker}"},
-    {"name": "Google News", "url": "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"}
+    {"name": "Google News", "url": "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"},
+    {"name": "PR Newswire", "url": "https://www.prnewswire.com/rss/news-releases-list.rss"},
+    {"name": "Business Wire", "url": "https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeEFhWXg=="},
+    {"name": "SEC - Company Filings (CIK 0001792789)", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001792789&type=&dateb=&owner=exclude&count=40&output=atom"}
   ]
 }

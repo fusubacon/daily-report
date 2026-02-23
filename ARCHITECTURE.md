@@ -86,6 +86,7 @@ Create a `sources.json` to override defaults:
   - `site/archive/YYYY-MM-DD.html` (daily reports)
 - You can host `site/` via GitHub Pages, Cloudflare Pages, or Netlify when ready.
 - For GitHub Pages custom domain, pass `--cname dash.example.com` so a `CNAME` file is generated.
+ - Fetch failures are surfaced in the report under “Fetch Errors”.
 
 ## GitHub Pages (dash.peigenyou.com)
 Use the repo `https://github.com/fusubacon/daily-report`.

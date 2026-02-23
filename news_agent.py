@@ -22,6 +22,18 @@ DEFAULT_SOURCES = [
         "name": "Google News",
         "url": "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en",
     },
+    {
+        "name": "PR Newswire",
+        "url": "https://www.prnewswire.com/rss/news-releases-list.rss",
+    },
+    {
+        "name": "Business Wire",
+        "url": "https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeEFhWXg==",
+    },
+    {
+        "name": "SEC - Company Filings (CIK 0001792789)",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001792789&type=&dateb=&owner=exclude&count=40&output=atom",
+    },
 ]
 
 STOPWORDS = set(
@@ -182,7 +194,7 @@ def build_summary_sentiment(items: List[Dict[str, str]]) -> Dict[str, object]:
     sentiment = sentiment_score([i["title"] + " " + i["summary"] for i in items])
     return {"summary": summary, "sentiment": sentiment}
 
-def render_report(date: str, ticker: str, items: List[Dict[str, str]], summary: str, sentiment: Dict[str, int]) -> str:
+def render_report(date: str, ticker: str, items: List[Dict[str, str]], summary: str, sentiment: Dict[str, int], errors: List[str]) -> str:
     lines = []
     lines.append(f"# {ticker} Daily News Summary")
     lines.append("")
@@ -197,6 +209,11 @@ def render_report(date: str, ticker: str, items: List[Dict[str, str]], summary: 
     lines.append(f"Label: {sentiment['label']}")
     lines.append(f"Score: {sentiment['score']}")
     lines.append("")
+    if errors:
+        lines.append("## Fetch Errors")
+        for e in errors:
+            lines.append(f"- {e}")
+        lines.append("")
     lines.append("## Articles")
     if not items:
         lines.append("No articles found.")
@@ -212,7 +229,7 @@ def render_report(date: str, ticker: str, items: List[Dict[str, str]], summary: 
     return "\n".join(lines)
 
 
-def render_html_report(date: str, ticker: str, items: List[Dict[str, str]], summary: str, sentiment: Dict[str, int]) -> str:
+def render_html_report(date: str, ticker: str, items: List[Dict[str, str]], summary: str, sentiment: Dict[str, int], errors: List[str]) -> str:
     def esc(s: str) -> str:
         return html.escape(s or "")
 
@@ -241,6 +258,14 @@ def render_html_report(date: str, ticker: str, items: List[Dict[str, str]], summ
     lines.append("<h2>Sentiment (non-predictive)</h2>")
     lines.append(f"<p>Label: {esc(sentiment['label'])} • Score: {sentiment['score']}</p>")
     lines.append("</div>")
+    if errors:
+        lines.append("<div class=\"card\">")
+        lines.append("<h2>Fetch Errors</h2>")
+        lines.append("<ul>")
+        for e in errors:
+            lines.append(f"<li>{esc(e)}</li>")
+        lines.append("</ul>")
+        lines.append("</div>")
     lines.append("<div class=\"card\">")
     lines.append("<h2>Articles</h2>")
     if not items:
@@ -267,12 +292,12 @@ def render_html_report(date: str, ticker: str, items: List[Dict[str, str]], summ
     return "\n".join(lines)
 
 
-def write_site(site_dir: Path, date: str, ticker: str, items: List[Dict[str, str]], summary: str, sentiment: Dict[str, int], cname: str) -> None:
+def write_site(site_dir: Path, date: str, ticker: str, items: List[Dict[str, str]], summary: str, sentiment: Dict[str, int], errors: List[str], cname: str) -> None:
     site_dir.mkdir(parents=True, exist_ok=True)
     archive_dir = site_dir / "archive"
     archive_dir.mkdir(parents=True, exist_ok=True)
 
-    html_report = render_html_report(date, ticker, items, summary, sentiment)
+    html_report = render_html_report(date, ticker, items, summary, sentiment, errors)
     latest_path = site_dir / "index.html"
     archive_path = archive_dir / f"{date}.html"
     latest_path.write_text(html_report)
@@ -316,13 +341,16 @@ def main() -> int:
     sources = load_sources(sources_path, args.ticker, args.query)
 
     all_items = []
+    errors = []
     for s in sources:
         try:
             feed = fetch_feed(s["url"])
             items = extract_items(feed, s["name"])
             all_items.extend(items)
         except Exception as e:
-            print(f"WARN: failed to fetch {s['name']}: {e}", file=sys.stderr)
+            msg = f"{s['name']}: {e}"
+            errors.append(msg)
+            print(f"WARN: failed to fetch {msg}", file=sys.stderr)
 
     items = dedupe(all_items)
     fetched_at = dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
@@ -330,13 +358,13 @@ def main() -> int:
     store_items(conn, items, fetched_at)
     conn.close()
     meta = build_summary_sentiment(items)
-    report = render_report(args.date, args.ticker, items, meta["summary"], meta["sentiment"])
+    report = render_report(args.date, args.ticker, items, meta["summary"], meta["sentiment"], errors)
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(report)
     if not args.no_site:
-        write_site(Path(args.site), args.date, args.ticker, items, meta["summary"], meta["sentiment"], args.cname)
+        write_site(Path(args.site), args.date, args.ticker, items, meta["summary"], meta["sentiment"], errors, args.cname)
     print(f"Wrote {out_path}")
     return 0
 
