@@ -20,6 +20,7 @@ if ! git remote get-url origin >/dev/null 2>&1; then
 fi
 
 TMP_DIR="$(mktemp -d)"
+rmdir "$TMP_DIR"
 
 git worktree add "$TMP_DIR" "$BRANCH" 2>/dev/null || true
 
